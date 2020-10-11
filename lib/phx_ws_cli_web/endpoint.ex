@@ -7,7 +7,7 @@ defmodule PhxWsCliWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_phx_ws_cli_key",
-    signing_salt: "b618R+4V"
+    signing_salt: "uTQKjw7F"
   ]
 
   socket "/socket", PhxWsCliWeb.UserSocket,

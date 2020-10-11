@@ -13,10 +13,10 @@ config :phx_ws_cli,
 # Configures the endpoint
 config :phx_ws_cli, PhxWsCliWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "bverFVPX8qOMyoQYnWFxK8Ijc6puk4Fn0dVl7Pthdejp1I8baA+CmFVZ9txhLjoc",
+  secret_key_base: "Ti6u38sKlKctvjNU7huQv7FNrRBUi7On0hB8cuHUvjSVunzVmewadpTn00uaXY+2",
   render_errors: [view: PhxWsCliWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: PhxWsCli.PubSub,
-  live_view: [signing_salt: "kSd6UIVt"]
+  live_view: [signing_salt: "VnAex1OZ"]
 
 # Configures Elixir's Logger
 config :logger, :console,
