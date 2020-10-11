@@ -1,48 +1,25 @@
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
+  <p>Connect to Websocket</p>
 
-  <form phx-change="suggest" phx-submit="search">
-    <input type="text" name="q" value="<%= @query %>" placeholder="Live dependency search" list="results" autocomplete="off"/>
-    <datalist id="results">
-      <%= for {app, _vsn} <- @results do %>
-        <option value="<%= app %>"><%= app %></option>
-      <% end %>
-    </datalist>
-    <button type="submit" phx-disable-with="Searching...">Go to Hexdocs</button>
-  </form>
-</section>
+  <%= if @connected do %>
+    <form phx-submit="disconnect">
+      <input type="text" name="url" value="<%= @url %>" disabled/>
+      <button type="submit">Disconnect</button>
+    </form>
+  <% else %>
+    <form phx-submit="connect">
+      <input type="text" name="url" value="<%= @url %>" placeholder="URL" autocomplete="off"/>
+      <button type="submit">Connect</button>
+    </form>
+  <% end %>
 
-<section class="row">
-  <article class="column">
-    <h2>Resources</h2>
-    <ul>
-      <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
-      </li>
-      <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.5/CHANGELOG.md">v1.5 Changelog</a>
-      </li>
-    </ul>
-  </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-    </ul>
-  </article>
+  <%= if @connected do %>
+    <form phx-submit="join">
+      <input type="text" name="channel" value="<%= @channel %>" placeholder="Channel" autocomplete="off"/>
+      <textarea style="background-color: white" name="join_params" placeholder="Join params" autocomplete="off">
+        <%= @join_params %>
+      </textarea>
+      <button type="submit" phx-disable-with="J...">Join</button>
+    </form>
+  <% end %>
 </section>
