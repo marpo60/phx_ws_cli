@@ -1,25 +1,58 @@
-<section class="phx-hero">
-  <p>Connect to Websocket</p>
+<header class="bg-gradient-to-r from-teal-400 to-blue-500">
+  <div class="flex h-12 items-center justify-center max-w-screen-lg ml-auto mr-auto p-10">
 
-  <%= if @connected do %>
-    <form phx-submit="disconnect">
-      <input type="text" name="url" value="<%= @url %>" disabled/>
-      <button type="submit">Disconnect</button>
-    </form>
-  <% else %>
-    <form phx-submit="connect">
-      <input type="text" name="url" value="<%= @url %>" placeholder="URL" autocomplete="off"/>
-      <button type="submit">Connect</button>
-    </form>
-  <% end %>
+    <%= if @connected do %>
+      <%= f = form_for :s, "#", [phx_submit: :disconnect, class: "flex w-full", autocomplete: "off", disabled: @connected] %>
+        <p class="bg-gray-400 p-2 rounded-l-full text-center w-40"> Connected </p>
+        <%= text_input f, :url, value: @url, class: "flex-1 p-2 outline-none rounded-r-full", disabled: true %>
+      </form>
 
-  <%= if @connected do %>
-    <form phx-submit="join">
-      <input type="text" name="channel" value="<%= @channel %>" placeholder="Channel" autocomplete="off"/>
-      <textarea style="background-color: white" name="join_params" placeholder="Join params" autocomplete="off">
-        <%= @join_params %>
-      </textarea>
-      <button type="submit" phx-disable-with="J...">Join</button>
-    </form>
-  <% end %>
-</section>
+      <%= f = form_for :s, "#", [phx_submit: :join, class: "ml-5 flex", autocomplete: "off"] %>
+        <%= text_input f, :channel, class: "outline-none pl-6 p-2 rounded-l-full", placeholder: "Topic" %>
+        <%= text_input(f, :join_params, placeholder: "Payload", class: "outline-none p-2") %>
+        <%= submit "Join", class: "bg-red-500 rounded-r-full p-2 w-20" %>
+      </form>
+    <% else %>
+      <%= f = form_for :s, "#", [phx_submit: :connect, class: "flex w-full", autocomplete: "off"] %>
+        <p class="bg-gray-400 p-2 rounded-l-full text-center w-40"> Disconnected </p>
+        <%= text_input f, :url, value: @url, class: "flex-1 p-2 outline-none" %>
+        <%= submit "Connect", class: "bg-indigo-100 p-2 rounded-r-full w-40" %>
+      </form>
+    <% end %>
+  </div>
+</header>
+
+<div class="flex">
+  <div class="w-1/5 p-4">
+    <p class="">Socket<p>
+      <%= if @connected do %>
+        <div class="flex justify-between">
+          <span> Connected </span>
+          <span phx-click="disconnect"> Disconnect </span>
+        </div>
+      <% else %>
+        <div class="flex justify-between">
+          <span> Not connected </span>
+        </div>
+      <% end %>
+    <p class="mt-5">Channels<p>
+    <div>
+      <%= for channel <- @channels do %>
+        <div class="flex justify-between">
+          <span class="break-all"> <%= channel %> </span>
+          <%= if channel in @connected_channels do %>
+            <span phx-click="leave" phx-value-topic="<%= channel %>"> Disconnect </span>
+          <% else %>
+            <span phx-click="join" phx-value-topic="<%= channel %>"> Connect </span>
+            <span phx-click="delete" phx-value-topic="<%= channel %>"> Delete </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="bg-white w-full">
+    <%= for event <- @events do %>
+      <%= live_component @socket, PhxWsCliWeb.EventComponent, event: event %>
+    <% end %>
+  </div>
+</div>

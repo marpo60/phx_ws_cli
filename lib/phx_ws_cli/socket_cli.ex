@@ -29,40 +29,37 @@ defmodule PhxWsCli.SocketCli do
   end
 
   def handle_joined(topic, payload, _transport, state) do
-    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:joined, payload})
+    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:joined, topic, payload})
 
     {:ok, state}
   end
 
   def handle_join_error(topic, payload, _transport, state) do
-    Logger.error("join error on the topic #{topic}: #{inspect payload}")
+    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:join_error, topic, payload})
     {:ok, state}
   end
 
   def handle_channel_closed(topic, payload, _transport, state) do
-    Logger.error("disconnected from the topic #{topic}: #{inspect payload}")
-    Process.send_after(self(), {:join, topic}, :timer.seconds(1))
+    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:channel_closed, topic, payload})
     {:ok, state}
   end
 
   def handle_message(topic, event, payload, _transport, state) do
-    Logger.warn("message on topic #{topic}: #{event} #{inspect payload}")
-    {:ok, state}
-  end
+    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:message, topic, event, payload})
 
-  def handle_reply("ping", _ref, %{"status" => "ok"} = payload, _transport, state) do
-    Logger.info("server pong ##{payload["response"]["ping_ref"]}")
     {:ok, state}
   end
 
   def handle_reply(topic, _ref, payload, _transport, state) do
-    Logger.warn("reply on topic #{topic}: #{inspect payload}")
+    PubSub.broadcast(PhxWsCli.PubSub, state.id, {:reply, payload})
+
     {:ok, state}
   end
 
-  def handle_info(:connect, _transport, state) do
-    Logger.info("connecting")
-    {:connect, state}
+  def handle_call(message, _arg2, _transport, state) do
+    Logger.warn("Unhandled #handle_call #{inspect(message)}")
+
+    {:noreply, state}
   end
 
   def handle_info({:join, topic, payload}, transport, state) do
@@ -71,16 +68,21 @@ defmodule PhxWsCli.SocketCli do
     {:ok, state}
   end
 
-  def handle_info(:disconnect, _transport, state) do
-    {:stop, "stop", state}
-  end
+  def handle_info({:leave, topic}, transport, state) do
+    GenSocketClient.leave(transport, topic)
 
-  def handle_info(message, _transport, state) do
-    Logger.warn("Unhandled message #{inspect message}")
     {:ok, state}
   end
 
-  def handle_call(_message, _arg2, _transport, state) do
-    {:noreply, state}
+  def handle_info(:disconnect, transport, state) do
+    GenServer.stop(transport.transport_pid)
+
+    {:ok, state}
+  end
+
+  def handle_info(message, _transport, state) do
+    Logger.warn("Unhandled #handle_info #{inspect(message)}")
+
+    {:ok, state}
   end
 end
